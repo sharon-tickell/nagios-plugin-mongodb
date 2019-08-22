@@ -328,8 +328,6 @@ def mongo_connect(host=None, port=None, ssl=False, user=None, passwd=None, repli
             con.the_database.authenticate(user, mechanism='SCRAM-SHA-1')
         elif ssl_cert and ssl_ca_cert_file and user and auth_mechanism == 'MONGODB-X509':
             con.the_database.authenticate(user, mechanism='MONGODB-X509')
-        elif mongorc_file and auth_mechanism == 'MONGORC':
-            con.load()
 
         try:
           result = con.admin.command("ismaster")
