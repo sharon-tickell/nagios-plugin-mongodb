@@ -132,6 +132,7 @@ def main(argv):
     p.add_option('--port-to-check', action='store', type='int', dest='port_to_check', default=None, help='The port you want to check (if this is different from the port you are connecting)')
     p.add_option('-u', '--user', action='store', type='string', dest='user', default=None, help='The username you want to login as')
     p.add_option('-p', '--pass', action='store', type='string', dest='passwd', default=None, help='The password you want to use for that user')
+    p.add_option('--password-file', action='store', type='string', dest='password_file', default=None, help='Path to file containing only the password')
     p.add_option('-W', '--warning', action='store', dest='warning', default=None, help='The warning threshold you want to set')
     p.add_option('-C', '--critical', action='store', dest='critical', default=None, help='The critical threshold you want to set')
     p.add_option('-A', '--action', action='store', type='choice', dest='action', default='connect', help='The action you want to take',
@@ -165,6 +166,10 @@ def main(argv):
     port_to_check = options.port_to_check if options.port_to_check else options.port
     user = options.user
     passwd = options.passwd
+    password_file = options.password_file
+    if password_file and not passwd:
+        with open(password_file, 'r') as password_reader:
+            passwd = password_reader.read().strip()
     authdb = options.authdb
 
     query_type = options.query_type
@@ -323,6 +328,8 @@ def mongo_connect(host=None, port=None, ssl=False, user=None, passwd=None, repli
             con.the_database.authenticate(user, mechanism='SCRAM-SHA-1')
         elif ssl_cert and ssl_ca_cert_file and user and auth_mechanism == 'MONGODB-X509':
             con.the_database.authenticate(user, mechanism='MONGODB-X509')
+        elif mongorc_file and auth_mechanism == 'MONGORC':
+            con.load()
 
         try:
           result = con.admin.command("ismaster")
